@@ -10,15 +10,21 @@
 
 .username-text {
     display: none;
+    margin-top: 4% !important;
 }
 
 .header-title {
     cursor: pointer;
 }
 
-.explore-button {
+.explore-button,.login-button {
     color: #00a278 !important;
 }
+/* .register-button {
+    color:#FFFFFF !important;
+    background-color: #00845c;
+    
+} */
 
 @media screen and (min-width: 768px) {
     .username-text {

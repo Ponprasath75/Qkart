@@ -7,8 +7,12 @@ import { config } from "../App";
 import Footer from "./Footer";
 import Header from "./Header";
 import "./Register.css";
+//import Link from 'link-react';
+import {NavLink,useHistory } from "react-router-dom";
+
 
 const Register = () => {
+  const history= useHistory();
   const { enqueueSnackbar } = useSnackbar();
   const [data,setData]=useState({username:"",password:"",confirmPassword:""})
   const [isNotLoading,setisNotLoading]=useState(true)
@@ -41,6 +45,7 @@ const Register = () => {
    * }
    */
   const register = async (formData) => {
+    
     setisNotLoading(false)
     console.log(formData)
     console.log(formData.username,formData.password,formData.confirmPassword)
@@ -57,7 +62,7 @@ const Register = () => {
       if(response.status===201){
         setisNotLoading(true)
         enqueueSnackbar("Registered successfully",{variant:"success"})
-        
+        history.push("/login")
       }
       // else if (response.data.status===400){
       //   enqueueSnackbar(`${response.message}`,{variant:"error"})
@@ -130,7 +135,7 @@ const Register = () => {
       justifyContent="space-between"
       minHeight="100vh"
     >
-      <Header hasHiddenAuthButtons />
+      <Header hasHiddenAuthButtons={true} />
       <Box className="content">
         <Stack spacing={2} className="form" onChange={eventHandler}>
           <h2 className="title">Register</h2>
@@ -171,9 +176,11 @@ const Register = () => {
          </Box>}
           <p className="secondary-action">
             Already have an account?{" "}
-             <a className="link" href="#">
-              Login here
-             </a>
+            <NavLink className="link" to="/login"> Login here</NavLink>
+             {/* <a className="link" href="/login"> */}
+              {/* Login here */}
+              {/* </Link> */}
+             {/* </a> */}
           </p>
         </Stack>
       </Box>
