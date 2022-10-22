@@ -17,14 +17,9 @@
     cursor: pointer;
 }
 
-.explore-button,.login-button {
+.explore-button {
     color: #00a278 !important;
 }
-/* .register-button {
-    color:#FFFFFF !important;
-    background-color: #00845c;
-    
-} */
 
 @media screen and (min-width: 768px) {
     .username-text {
