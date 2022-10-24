@@ -6,8 +6,10 @@ import "./Header.css";
 import {NavLink,useHistory } from "react-router-dom";
 
 const Header = ({ children, hasHiddenAuthButtons }) => {
-  const history= useHistory()
+  const history= useHistory();
+  
   const toRegister=()=>{
+    console.log(history.location.pathname,'history')
     history.push("/register")
   }
   const toLogin=()=>{
@@ -23,6 +25,7 @@ const Header = ({ children, hasHiddenAuthButtons }) => {
   const toProducts=()=>{
     history.push("/")
   }
+  
   if (hasHiddenAuthButtons){
     return (
       <Box className="header">
@@ -44,7 +47,9 @@ const Header = ({ children, hasHiddenAuthButtons }) => {
     <Box className="header-title">
         <img src="logo_light.svg" alt="QKart-icon"></img>
     </Box>
-    {/* {children} */}
+{children}
+    
+    
     <Stack direction="row" spacing={2}>
     {(localStorage.getItem('username'))?
     (<>

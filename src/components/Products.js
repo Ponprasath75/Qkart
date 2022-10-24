@@ -13,6 +13,7 @@ import { config } from "../App";
 import Footer from "./Footer";
 import Header from "./Header";
 import "./Products.css";
+import ProductCard from "../components/ProductCard"
 
 // Definition of Data Structures used
 /**
@@ -27,7 +28,11 @@ import "./Products.css";
  */
 
 
-const Products = () => {
+ const Products = () => {
+  const [productsList,setProductsList]=useState([]);
+  const [isLoading,setisLoading]=useState(true);
+  const { enqueueSnackbar } = useSnackbar();
+  const [debounceTimeout,setDebounceTimeout] = useState(null);
 
   // TODO: CRIO_TASK_MODULE_PRODUCTS - Fetch products data and store it
   /**
@@ -67,7 +72,24 @@ const Products = () => {
    * }
    */
   const performAPICall = async () => {
-  };
+    try{
+      const response=await axios.get(`${config.endpoint}/products`);
+      const value=response.data;
+      setProductsList(value);
+      console.log(value)
+      setisLoading(false)
+      return response.data
+
+    }
+    catch(err){
+      if(err.response.status===400){
+        console.log(err.response)
+        enqueueSnackbar(`${err.response.data.message}`,{variant:"error"})}
+      else{
+      enqueueSnackbar("Something went wrong. Check the backend console for more details",{variant:"error"})}
+    }
+  
+ };
 
   // TODO: CRIO_TASK_MODULE_PRODUCTS - Implement search logic
   /**
@@ -84,7 +106,37 @@ const Products = () => {
    *
    */
   const performSearch = async (text) => {
-  };
+    const url=`${config.endpoint}/products`
+    var reqURL=""
+    // if(text!==""){
+      reqURL=`${url}/search?value=${text}`
+    // }
+    // else{
+    //   reqURL=url
+    // }
+    try{
+      const response=await axios.get(reqURL);
+      const value=response.data;
+      setProductsList(value);
+      console.log(value)
+      setisLoading(false)
+      return response.data
+
+    }
+    catch(err){
+      console.log(err.response)
+      if(err.response.status===404){
+        // console.log(err.response)
+        setProductsList([]);}
+      else if(err.response.status===500){
+        enqueueSnackbar(err.response.data.message,{variant:"error"});
+        // setProductsList(products)
+      }
+      else{
+        enqueueSnackbar("Could not fetch products. Check that the backend is running, reachable and returns valid JSON",{variant:"error"})
+        
+    }
+  }};
 
   // TODO: CRIO_TASK_MODULE_PRODUCTS - Optimise API calls with debounce search implementation
   /**
@@ -99,8 +151,18 @@ const Products = () => {
    *
    */
   const debounceSearch = (event, debounceTimeout) => {
+    const value=event.target.value
+    if(debounceTimeout){
+      clearTimeout(debounceTimeout)
+    }
+    const Timeout=setTimeout(()=>{performSearch(value)},500)
+    setDebounceTimeout(Timeout)
   };
 
+
+  useEffect(() => {
+    performAPICall(); 
+  }, []);
 
 
 
@@ -111,6 +173,20 @@ const Products = () => {
     <div>
       <Header hasHiddenAuthButtons={false}>
         {/* TODO: CRIO_TASK_MODULE_PRODUCTS - Display search bar in the header for Products page */}
+        <TextField
+        className="search-desktop"
+        size=	'small'
+        InputProps={{ className: "search",
+          endAdornment: (
+            <InputAdornment position="end">
+              <Search color="primary" />
+            </InputAdornment>
+          ),
+        }}
+        placeholder="Search for items/categories"
+        name="search"
+        onChange={e=>debounceSearch(e,debounceTimeout)}
+      />
 
       </Header>
 
@@ -128,6 +204,7 @@ const Products = () => {
         }}
         placeholder="Search for items/categories"
         name="search"
+        onChange={e=>debounceSearch(e,debounceTimeout)}
       />
        <Grid container>
          <Grid item className="product-grid">
@@ -137,6 +214,27 @@ const Products = () => {
                to your door step
              </p>
            </Box>
+           {isLoading &&
+           <Box className="loading" sx={{ display: 'flex',justifyContent:"center"}}>
+           <CircularProgress color="success"/>
+           <div >Loading Products</div>
+         </Box>}
+           {!isLoading &&
+          <Grid container marginY="1rem" paddingY="1rem" paddingX="1rem" spacing={2}>
+          { productsList.length ?
+            (productsList.map((product) => 
+            (
+           <Grid item xs={12} sm={6} md={3} key={product.id} >
+           <ProductCard product={product}/>
+            </Grid>)
+            ))
+            :(
+              <Box className="loading" sx={{ display: 'flex',justifyContent:"center"}}>
+              <SentimentDissatisfied />
+              <div >No Products Found</div>
+         </Box>
+            ) }
+          </Grid>}
          </Grid>
        </Grid>
       <Footer />
