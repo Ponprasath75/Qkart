@@ -48,7 +48,11 @@ import "./Cart.css";
  *
  */
 export const generateCartItemsFrom = (cartData, productsData) => {
+  if (!cartData) return;
+  const cartItems= cartData.map((item)=>({...item,...productsData.find((product)=>product._id===item.productId),}));
+  return cartItems
 };
+
 
 /**
  * Get the total value of all products added to the cart
@@ -60,7 +64,16 @@ export const generateCartItemsFrom = (cartData, productsData) => {
  *    Value of all items in the cart
  *
  */
-export const getTotalCartValue = (items = []) => {
+ export const getTotalCartValue = (items = []) => {
+  //if there is no item in the cart
+  if (!items.length) return 0;
+
+  //For the items in the cart total it and return the final cost
+  const total = items
+    .map((item) => item.cost * item.qty)
+    .reduce((total, n) => total + n);
+
+  return total;
 };
 
 
@@ -82,8 +95,19 @@ const ItemQuantity = ({
   value,
   handleAdd,
   handleDelete,
+  isReadOnly
 }) => {
+  if(isReadOnly){
+    return(
+      <Stack direction="row" alignItems="centre">
+         <Box padding="0.5rem" data-testid="item-qty">
+          Qty:{value}
+        </Box>
+      </Stack>
+    );
+  }
   return (
+
     <Stack direction="row" alignItems="center">
       <IconButton size="small" color="primary" onClick={handleDelete}>
         <RemoveOutlined />
@@ -115,8 +139,15 @@ const ItemQuantity = ({
 const Cart = ({
   products,
   items = [],
-  handleQuantity,
+  handleQuantity,isReadOnly
 }) => {
+  const token = localStorage.getItem("token");
+
+  const history = useHistory();
+
+  const routeToCheckout = () => {
+    history.push("/checkout");
+  };
 
   if (!items.length) {
     return (
@@ -129,10 +160,72 @@ const Cart = ({
     );
   }
 
+
   return (
     <>
       <Box className="cart">
         {/* TODO: CRIO_TASK_MODULE_CART - Display view for each cart item with non-zero quantity */}
+        {items.map((item) => (
+          <Box key={item.productId}>
+            {item.qty > 0 ? (
+              <Box display="flex" alignItems="flex-start" padding="1rem">
+                <Box className="image-container">
+                  <img
+                    src={item.image}
+                    // Add product name as alt eext
+                    alt={item.name}
+                    width="100%"
+                    height="100%"
+                  />
+                </Box>
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="space-between"
+                  height="6rem"
+                  paddingX="1rem"
+                >
+                  <div>{item.name}</div>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <ItemQuantity
+                      value={item.qty}
+                      // Add required props by checking implementation
+                      handleAdd={async () => {
+                        await handleQuantity(
+                          token,
+                          items,
+                          item.productId,
+                          products,
+                          item.qty + 1
+                        );
+                      }}
+                      handleDelete={async () => {
+                        await handleQuantity(
+                          token,
+                          items,
+                          item.productId,
+                          products,
+                          item.qty - 1
+                        );
+                      }}
+                      isReadOnly={isReadOnly}
+                    />
+
+                    <Box padding="0.5rem" fontWeight="700">
+                      ${item.cost}
+                    </Box>
+                  </Box>
+                </Box>
+                {/* this is for checking if the product is more than one */}
+              </Box>
+            ) : null}
+          </Box>
+        ))}
+
         <Box
           padding="1rem"
           display="flex"
@@ -154,14 +247,15 @@ const Cart = ({
         </Box>
 
         <Box display="flex" justifyContent="flex-end" className="cart-footer">
-          <Button
+         {!isReadOnly && (<Button
             color="primary"
             variant="contained"
             startIcon={<ShoppingCart />}
             className="checkout-btn"
+            onClick={routeToCheckout}
           >
             Checkout
-          </Button>
+          </Button>)}
         </Box>
       </Box>
     </>

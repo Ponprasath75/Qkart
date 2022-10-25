@@ -24,7 +24,7 @@ const ProductCard = ({ product, handleAddToCart }) => {
     <Card className="card">
       <CardMedia
         component="img"
-        height="300"
+        // height="300"
         image={product.image}
         alt={product.name}
       />
@@ -39,7 +39,7 @@ const ProductCard = ({ product, handleAddToCart }) => {
       </CardContent>
       <CardActions>
         <Button fullWidth
-          className="card-button" size="medium" variant="contained" startIcon={<AddShoppingCartOutlined />}>Add to Cart</Button>
+          className="card-button" size="medium" variant="contained" onClick={handleAddToCart} startIcon={<AddShoppingCartOutlined />}>Add to Cart</Button>
       </CardActions>
     </Card>
   );

@@ -43,7 +43,9 @@
   width: 100%;
   height: 50vh;
 }
-
+.cart-grid{
+  background: #E9F5E1;
+}
 .search-mobile {
   display: block !important;
 }
@@ -69,4 +71,5 @@
   .search-desktop {
     display: block !important;
   }
+  
 }

@@ -5,6 +5,7 @@ import Login from "./components/Login";
 import Products from "./components/Products";
 import ThemeProvider from "./theme";
 import React, { useState } from "react";
+import Checkout from "./components/Checkout"
 
 export const config = {
   endpoint: `http://${ipConfig.workspaceIp}:8082/api/v1`,
@@ -17,6 +18,7 @@ function App() {
       <Route path="/register"><Register /></Route> 
       <Route path="/login" ><Login /></Route> 
       <Route exact path="/"> <Products /></Route> 
+      <Route path="/checkout" ><Checkout /></Route> 
       </Switch>
       {/* <React.StrictMode> */}
       {/* <ThemeProvider> */}

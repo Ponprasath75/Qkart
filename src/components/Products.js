@@ -14,6 +14,7 @@ import Footer from "./Footer";
 import Header from "./Header";
 import "./Products.css";
 import ProductCard from "../components/ProductCard"
+import Cart,{generateCartItemsFrom} from "../components/Cart"
 
 // Definition of Data Structures used
 /**
@@ -33,6 +34,8 @@ import ProductCard from "../components/ProductCard"
   const [isLoading,setisLoading]=useState(true);
   const { enqueueSnackbar } = useSnackbar();
   const [debounceTimeout,setDebounceTimeout] = useState(null);
+  const token=localStorage.getItem('token')
+  const[items,setItems] = useState([]);
 
   // TODO: CRIO_TASK_MODULE_PRODUCTS - Fetch products data and store it
   /**
@@ -159,11 +162,61 @@ import ProductCard from "../components/ProductCard"
     setDebounceTimeout(Timeout)
   };
 
+const fetchCart = async(token)=> {
+  if(!token) return;
+  try{
+  const url = `${config.endpoint}/cart`
+  const response = await axios.get(url,{
+  headers:{
+    Authorization : `Bearer ${token}`
+  }})
+  // console.log(response)
+return response.data}
+  catch(err){
+    enqueueSnackbar(err.response.data.message,{variant:"error"});
+    return null
+  }
+}
+
+const isItemInCart=(items,productId)=>{
+  return items.findIndex((item)=>item.productId===productId)!==-1
+};
+
+const addToCart =async (token,items,productId,products,qty,check={preventDuplicate:false})=>{
+  if(!token)
+  {enqueueSnackbar("Login to add an item to the Cart",{variant:"warning"})
+  return}
+
+  if(check.preventDuplicate && isItemInCart(items,productId)){
+    enqueueSnackbar("Item already in Cart.Use the cart sidebar to update quantity or remove item",{variant:"warning"})
+      return;
+  }
+  try{
+    const url =`${config.endpoint}/cart`;
+    const response=await axios.post(url,{productId,qty},{headers:{
+      Authorization:`Bearer ${token}`,
+    },})
+    console.log(response.data,'ff')
+    const cartItems=generateCartItemsFrom(response.data,products);
+    setItems(cartItems)
+  }
+  catch(err){
+    if(err.response){
+      enqueueSnackbar(err.response.data.message,{variant:'warning'})
+      return null
+    }else{
+      enqueueSnackbar("Could not fetch products. Check that the backend is running, reachable and returns valid JSON",{variant:"error"})
+    }
+  }
+}
 
   useEffect(() => {
     performAPICall(); 
   }, []);
 
+  useEffect(() => {
+    fetchCart(token).then((cartData) => generateCartItemsFrom(cartData,productsList))
+    .then((cartItems)=>setItems(cartItems));},[productsList])
 
 
 
@@ -207,7 +260,7 @@ import ProductCard from "../components/ProductCard"
         onChange={e=>debounceSearch(e,debounceTimeout)}
       />
        <Grid container>
-         <Grid item className="product-grid">
+         <Grid item className="product-grid" xs={12} md={token ? 9:12}>
            <Box className="hero">
              <p className="hero-heading">
                India’s <span className="hero-highlight">FASTEST DELIVERY</span>{" "}
@@ -222,11 +275,13 @@ import ProductCard from "../components/ProductCard"
            {!isLoading &&
           <Grid container marginY="1rem" paddingY="1rem" paddingX="1rem" spacing={2}>
           { productsList.length ?
-            (productsList.map((product) => 
-            (
-           <Grid item xs={12} sm={6} md={3} key={product.id} >
-           <ProductCard product={product}/>
-            </Grid>)
+            (productsList.map((product) =>   
+           <Grid item xs={12} sm={6} md={3} key={product._id} >
+           <ProductCard product={product}
+           handleAddToCart ={async()=>{
+            debugger; 
+            await addToCart(token,items,product._id,productsList,1,{preventDuplicate:true})}}/>
+            </Grid>
             ))
             :(
               <Box className="loading" sx={{ display: 'flex',justifyContent:"center"}}>
@@ -236,7 +291,15 @@ import ProductCard from "../components/ProductCard"
             ) }
           </Grid>}
          </Grid>
+         
+         {(token)?
+         (<Grid item xs={12} md={3}  className="cart-grid"><Cart products={productsList} 
+         items={items} 
+         handleQuantity={addToCart} /></Grid>) 
+        :null} 
+        
        </Grid>
+       
       <Footer />
     </div>
   );

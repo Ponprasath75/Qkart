@@ -46,7 +46,8 @@ import Header from "./Header";
 
 const Checkout = () => {
 
-
+const [items,setItems]=useState([]);
+const [products, setProducts] = useState([]);
 
 
 
