@@ -77,6 +77,8 @@ export const generateCartItemsFrom = (cartData, productsData) => {
 };
 
 
+export const getTotalItems = (items = []) => {
+};
 /**
  * Component to display the current quantity for a product and + and - buttons to update product quantity on cart
  * 
@@ -89,6 +91,8 @@ export const generateCartItemsFrom = (cartData, productsData) => {
  * @param {Function} handleDelete
  *    Handler function which reduces the quantity of a product in cart by 1
  * 
+ * @param {Boolean} isReadOnly
+ *    If product quantity on cart is to be displayed as read only without the + - options to change quantity
  * 
  */
 const ItemQuantity = ({
@@ -134,6 +138,8 @@ const ItemQuantity = ({
  * @param {Function} handleDelete
  *    Current quantity of product in cart
  * 
+ * @param {Boolean} isReadOnly
+ *    If product quantity on cart is to be displayed as read only without the + - options to change quantity
  * 
  */
 const Cart = ({
