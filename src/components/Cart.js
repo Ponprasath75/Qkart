@@ -78,6 +78,7 @@ export const generateCartItemsFrom = (cartData, productsData) => {
 
 
 export const getTotalItems = (items = []) => {
+  
 };
 /**
  * Component to display the current quantity for a product and + and - buttons to update product quantity on cart
